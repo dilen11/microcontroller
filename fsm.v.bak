@@ -1,0 +1,829 @@
+
+module fsm (
+                //outputs
+                bus_out,
+                alu_op,
+                alu_param1_read,
+                alu_param2_read,
+                alu_enable_out,
+                alu_reset,
+                reg0_enable_out,
+                reg0_enable_read,
+                reg1_enable_out,
+                reg1_enable_read,
+                reg2_enable_out,
+                reg2_enable_read,
+                reg3_enable_out,
+                reg3_enable_read,
+                mem_enable,
+                mem_rw,
+                pc_reset,
+                pc_enable_out,
+                pc_enable_increment,
+                mar_reset,
+                mar_enable_out,
+                mar_enable_read,
+                reg_reset,
+                mdr_reset,
+                mdr_enable_bus_out,
+                mdr_enable_mem_out,
+                mdr_enable_bus_read,
+                mdr_enable_mem_read,
+                id_reset,
+                id_enable,
+
+                //inputs
+                opCode,
+                param1,
+                param2,
+                mfc,
+                clock,
+                reset
+              );
+
+output reg[15:0] bus_out;
+output reg[2:0] alu_op;
+output reg reg0_enable_out, reg0_enable_read,
+      reg1_enable_out, reg1_enable_read,
+      reg2_enable_out, reg2_enable_read,
+      reg3_enable_out, reg3_enable_read,
+      alu_enable_out, alu_reset, pc_reset,
+      pc_enable_out, pc_enable_increment,
+      mar_reset, mar_enable_out,
+      mar_enable_read, reg_reset,
+      mem_enable, mem_rw, mdr_reset,
+      mdr_enable_bus_out, mdr_enable_mem_out,
+      mdr_enable_bus_read, mdr_enable_mem_read,
+      id_reset, id_enable,
+      alu_param1_read, alu_param2_read;
+
+input[3:0] opCode;
+input[5:0] param1, param2;
+input mfc, clock, reset;
+
+parameter fsm_IF_1 = 6'd0,
+          fsm_IF_2 = 6'd1,
+          fsm_IF_3 = 6'd2,
+          fsm_IF_4 = 6'd3,
+          fsm_IF_5 = 6'd4,
+          fsm_IF_6 = 6'd5,
+          fsm_IF_7 = 6'd6,
+          fsm_IF_8 = 6'd7,
+          fsm_IF_9 = 6'd8,
+          fsm_IF_10 = 6'd9,
+
+          fsm_Mov_1 = 6'd10,
+          fsm_Mov_2 = 6'd11,
+          fsm_Mov_3 = 6'd12,
+          fsm_Mov_4 = 6'd13,
+
+          fsm_Movi_1 = 6'd14,
+          fsm_Movi_2 = 6'd15,
+          fsm_Movi_3 = 6'd16,
+          fsm_Movi_4 = 6'd17,
+
+          fsm_ALURegOp_1 = 6'd18,
+          fsm_ALURegOp_2 = 6'd19,
+          fsm_ALURegOp_3 = 6'd20,
+          fsm_ALURegOp_4 = 6'd21,
+          fsm_ALURegOp_5 = 6'd22,
+          fsm_ALURegOp_6 = 6'd23,
+          fsm_ALURegOp_7 = 6'd24,
+          fsm_ALURegOp_8 = 6'd25,
+          fsm_ALURegOp_9 = 6'd26,
+          fsm_ALURegOp_10 = 6'd53,
+          fsm_ALURegOp_11 = 6'd54,
+          fsm_ALURegOp_12 = 6'd55,
+
+          fsm_ALUImmOp_1 = 6'd27,
+          fsm_ALUImmOp_2 = 6'd28,
+          fsm_ALUImmOp_3 = 6'd29,
+          fsm_ALUImmOp_4 = 6'd30,
+          fsm_ALUImmOp_5 = 6'd31,
+          fsm_ALUImmOp_6 = 6'd32,
+          fsm_ALUImmOp_7 = 6'd33,
+          fsm_ALUImmOp_8 = 6'd34,
+          fsm_ALUImmOp_9 = 6'd56,
+          fsm_ALUImmOp_10 = 6'd57,
+          fsm_ALUImmOp_11 = 6'd58,
+          fsm_ALUImmOp_12 = 6'd59,
+
+          fsm_Load_1 = 6'd35,
+          fsm_Load_2 = 6'd36,
+          fsm_Load_3 = 6'd37,
+          fsm_Load_4 = 6'd38,
+          fsm_Load_5 = 6'd39,
+          fsm_Load_6 = 6'd40,
+          fsm_Load_7 = 6'd41,
+          fsm_Load_8 = 6'd42,
+
+          fsm_Store_1 = 6'd43,
+          fsm_Store_2 = 6'd44,
+          fsm_Store_3 = 6'd45,
+          fsm_Store_4 = 6'd46,
+          fsm_Store_5 = 6'd47,
+          fsm_Store_6 = 6'd48,
+          fsm_Store_7 = 6'd49,
+          fsm_Store_8 = 6'd50,
+          fsm_Store_9 = 6'd60,
+
+          fsm_reset_1 = 6'd51,
+          fsm_reset_2 = 6'd52;
+
+reg [5:0] pres_state, next_state;
+
+//FSM state transitions
+always @(posedge clock)
+begin
+  if (reset == 0)
+  begin
+    pres_state = next_state;
+  end
+  else //reset == 1
+  begin
+    pres_state = fsm_reset_1;
+  end
+end
+
+
+//FSM calculate next state
+always @(posedge reset or posedge clock)
+begin:fsm
+  //if (reset == 1)
+  if (reset)
+    next_state <= fsm_reset_1;
+  else if (pres_state == fsm_reset_2)
+    next_state <= fsm_IF_1;
+
+  else
+  begin
+    case(pres_state)
+      fsm_IF_1:
+        next_state <= fsm_IF_2;
+      fsm_IF_2:
+        next_state <= fsm_IF_3;
+      fsm_IF_3:
+        next_state <= fsm_IF_4;
+      fsm_IF_4:
+        next_state <= fsm_IF_5;
+      fsm_IF_5:
+      begin
+        if (mfc)
+          next_state <= fsm_IF_6;
+        else
+          next_state <= fsm_IF_5;
+      end
+      fsm_IF_6:
+        next_state <= fsm_IF_7;
+      fsm_IF_7:
+        next_state <= fsm_IF_8;
+      fsm_IF_8:
+        next_state <= fsm_IF_9;
+      fsm_IF_9:
+        next_state <= fsm_IF_10;
+      fsm_IF_10:
+        case(opCode)
+          4'b0000: //Mov
+            next_state <= fsm_Mov_1;
+          4'b0001: //Add
+            next_state <= fsm_ALURegOp_1;
+          4'b0010: //Addi
+            next_state <= fsm_ALUImmOp_1;
+          4'b0011: //Sub
+            next_state <= fsm_ALURegOp_1;
+          4'b0100: //Subi
+            next_state <= fsm_ALUImmOp_1;
+          4'b0101: //Not
+            next_state <= fsm_ALURegOp_1;
+          4'b0110: //And
+            next_state <= fsm_ALURegOp_1;
+          4'b0111: //Or
+            next_state <= fsm_ALURegOp_1;
+          4'b1000: //Xor
+            next_state <= fsm_ALURegOp_1;
+          4'b1001: //Xnor
+            next_state <= fsm_ALURegOp_1;
+          4'b1010: //Movi
+            next_state <= fsm_Movi_1;
+          4'b1011: //Load
+            next_state <= fsm_Load_1;
+          4'b1100: //Store
+            next_state <= fsm_Store_1;
+          default:
+            next_state <= fsm_reset_1;
+        endcase//opCode
+
+      fsm_Mov_1:
+        next_state <= fsm_Mov_2;
+      fsm_Mov_2:
+        next_state <= fsm_Mov_3;
+      fsm_Mov_3:
+        next_state <= fsm_Mov_4;
+      fsm_Mov_4:
+        next_state <= fsm_IF_1;
+
+      fsm_Movi_1:
+        next_state <= fsm_Movi_2;
+      fsm_Movi_2:
+        next_state <= fsm_Movi_3;
+      fsm_Movi_3:
+        next_state <= fsm_Movi_4;
+      fsm_Movi_4:
+        next_state <= fsm_IF_1;
+
+      fsm_ALURegOp_1:
+        next_state <= fsm_ALURegOp_2;
+      fsm_ALURegOp_2:
+        next_state <= fsm_ALURegOp_3;
+      fsm_ALURegOp_3:
+        next_state <= fsm_ALURegOp_4;
+      fsm_ALURegOp_4:
+        next_state <= fsm_ALURegOp_5;
+      fsm_ALURegOp_5:
+        next_state <= fsm_ALURegOp_6;
+      fsm_ALURegOp_6:
+        next_state <= fsm_ALURegOp_7;
+      fsm_ALURegOp_7:
+        next_state <= fsm_ALURegOp_8;
+      fsm_ALURegOp_8:
+        next_state <= fsm_ALURegOp_9;
+      fsm_ALURegOp_9:
+        next_state <= fsm_ALURegOp_10;
+      fsm_ALURegOp_10:
+        next_state <= fsm_ALURegOp_11;
+      fsm_ALURegOp_11:
+        next_state <= fsm_ALURegOp_12;
+      fsm_ALURegOp_12:
+        next_state <= fsm_IF_1;
+
+      fsm_ALUImmOp_1:
+        next_state <= fsm_ALUImmOp_2;
+      fsm_ALUImmOp_2:
+        next_state <= fsm_ALUImmOp_3;
+      fsm_ALUImmOp_3:
+        next_state <= fsm_ALUImmOp_4;
+      fsm_ALUImmOp_4:
+        next_state <= fsm_ALUImmOp_5;
+      fsm_ALUImmOp_5:
+        next_state <= fsm_ALUImmOp_6;
+      fsm_ALUImmOp_6:
+        next_state <= fsm_ALUImmOp_7;
+      fsm_ALUImmOp_7:
+        next_state <= fsm_ALUImmOp_8;
+      fsm_ALUImmOp_8:
+        next_state <= fsm_ALUImmOp_9;
+      fsm_ALUImmOp_9:
+        next_state <= fsm_ALUImmOp_10;
+      fsm_ALUImmOp_10:
+        next_state <= fsm_ALUImmOp_11;
+      fsm_ALUImmOp_11:
+        next_state <= fsm_ALUImmOp_12;
+      fsm_ALUImmOp_12:
+        next_state <= fsm_IF_1;
+
+
+      fsm_reset_1:
+        next_state <= fsm_reset_2;
+      fsm_reset_1:
+      begin
+        if (reset == 0)
+          next_state <= fsm_reset_2;
+        else
+          next_state <= fsm_reset_1;
+      end
+
+      fsm_Load_1:
+        next_state <= fsm_Load_2;
+      fsm_Load_2:
+        next_state <= fsm_Load_3;
+      fsm_Load_3:
+        next_state <= fsm_Load_4;
+      fsm_Load_4:
+      begin
+        if (mfc)
+          next_state <= fsm_Load_5;
+        else
+          next_state <= fsm_Load_4;
+      end
+      fsm_Load_5:
+        next_state <= fsm_Load_6;
+      fsm_Load_6:
+        next_state <= fsm_Load_7;
+      fsm_Load_7:
+        next_state <= fsm_Load_8;
+      fsm_Load_8:
+        next_state <= fsm_IF_1;
+
+      fsm_Store_1:
+        next_state <= fsm_Store_2;
+      fsm_Store_2:
+        next_state <= fsm_Store_3;
+      fsm_Store_3:
+        next_state <= fsm_Store_4;
+      fsm_Store_4:
+        next_state <= fsm_Store_5;
+      fsm_Store_5:
+        next_state <= fsm_Store_6;
+      fsm_Store_6:
+        next_state <= fsm_Store_7;
+      fsm_Store_7:
+        next_state <= fsm_Store_8;
+      fsm_Store_8:
+      begin
+        if (mfc)
+          next_state <= fsm_Store_9;
+        else
+          next_state <= fsm_Store_8;
+      end
+      fsm_Store_9:
+        next_state <= fsm_IF_1;
+
+      default:
+        next_state <= fsm_reset_1;
+    endcase//pres_state
+  end
+end//fsm
+
+
+
+//Moore machine calculate output
+always @(pres_state)
+begin:calc_output
+  case(pres_state)
+    //Instruction Fetch state machines
+    fsm_IF_1: //Send pc val to MAR
+    begin
+      pc_enable_out <= 1'b1;
+    end
+    fsm_IF_2: //Wait to ensure MAR receives value
+    begin
+      mar_enable_read <= 1'b1;
+    end
+    fsm_IF_3: //Send MAR to MEM and read from MEM for MDR
+    begin
+      mar_enable_read <= 1'b0;
+      mdr_enable_mem_read <= 1'b1;
+    end
+    fsm_IF_4:
+    begin
+      pc_enable_out <= 1'b0;
+    end
+    fsm_IF_5: //Send mem enable signal
+    begin
+      mem_enable <= 1'b1;
+    end
+    fsm_IF_6: //Send MAR to MEM and read from MEM for MDR
+    begin
+      mem_enable <= 1'b0;
+    end
+    fsm_IF_7: //Output MDR to bus to ID, increment PC
+    begin
+      mem_enable <= 1'b0;
+      pc_enable_increment <= 1'b1;
+      mdr_enable_mem_read <= 1'b0;
+      mdr_enable_bus_out <= 1'b1;
+    end
+    fsm_IF_8: //Output MDR to bus to ID, increment PC
+    begin
+      pc_enable_increment <= 1'b0;
+      id_enable <= 1'b1;
+    end
+    fsm_IF_9: //Deactivate fsm-IF signals
+    begin
+      mdr_enable_bus_out <= 1'b0;
+    end
+    fsm_IF_10: //Deactivate fsm-IF signals
+    begin
+      id_enable <= 1'b0;
+    end
+
+    //Move operation state machine
+    fsm_Mov_1:
+      case (param2)
+        6'd0: reg0_enable_out <= 1'b1;
+        6'd1: reg1_enable_out <= 1'b1;
+        6'd2: reg2_enable_out <= 1'b1;
+        6'd3: reg3_enable_out <= 1'b1;
+      endcase
+    fsm_Mov_2:
+      case (param1)
+        6'd0: reg0_enable_read <= 1'b1;
+        6'd1: reg1_enable_read <= 1'b1;
+        6'd2: reg2_enable_read <= 1'b1;
+        6'd3: reg3_enable_read <= 1'b1;
+      endcase
+    fsm_Mov_3:
+      case (param1)
+        6'd0: reg0_enable_read <= 1'b0;
+        6'd1: reg1_enable_read <= 1'b0;
+        6'd2: reg2_enable_read <= 1'b0;
+        6'd3: reg3_enable_read <= 1'b0;
+      endcase
+    fsm_Mov_4:
+      case (param2)
+        6'd0: reg0_enable_out <= 1'b0;
+        6'd1: reg1_enable_out <= 1'b0;
+        6'd2: reg2_enable_out <= 1'b0;
+        6'd3: reg3_enable_out <= 1'b0;
+      endcase
+
+    //Move immediate operation state machine
+    fsm_Movi_1: //Output imm value to bus, param1 reg read
+    begin
+      bus_out <= {{10{1'b0}},{param2}};
+    end
+    fsm_Movi_2:
+    begin
+      case (param1)
+        6'd0: reg0_enable_read <= 1'b1;
+        6'd1: reg1_enable_read <= 1'b1;
+        6'd2: reg2_enable_read <= 1'b1;
+        6'd3: reg3_enable_read <= 1'b1;
+      endcase
+    end
+    fsm_Movi_3:
+    begin
+      case (param1)
+        6'd0: reg0_enable_read <= 1'b0;
+        6'd1: reg1_enable_read <= 1'b0;
+        6'd2: reg2_enable_read <= 1'b0;
+        6'd3: reg3_enable_read <= 1'b0;
+      endcase
+    end
+    fsm_Movi_4: //Deassert bus, deactivate fsm-Movi signals
+    begin
+      bus_out <= 16'dz;
+    end
+
+    //ALU register operation state machines
+    fsm_ALURegOp_1: //Send param1 and opCode to ALU
+    begin
+      case (opCode)
+        4'b0001: alu_op <= 3'b000; //Add
+        4'b0011: alu_op <= 3'b001; //Sub
+        4'b0101: alu_op <= 3'b010; //Not
+        4'b0110: alu_op <= 3'b011; //And
+        4'b0111: alu_op <= 3'b100; //Or
+        4'b1000: alu_op <= 3'b101; //Xor
+        4'b1000: alu_op <= 3'b110; //Xnor
+      endcase
+      case (param1)
+        6'd0: reg0_enable_out <= 1'b1;
+        6'd1: reg1_enable_out <= 1'b1;
+        6'd2: reg2_enable_out <= 1'b1;
+        6'd3: reg3_enable_out <= 1'b1;
+        default: reg0_enable_out <= 1'b1;
+      endcase
+    end
+    fsm_ALURegOp_2:
+    begin
+      alu_param1_read <= 1'b1;
+    end
+    fsm_ALURegOp_3:
+    begin
+      alu_param1_read <= 1'b0;
+    end
+    fsm_ALURegOp_4: //Send param1 and opCode to ALU
+    begin
+      case (param1)
+        6'd0: reg0_enable_out <= 1'b0;
+        6'd1: reg1_enable_out <= 1'b0;
+        6'd2: reg2_enable_out <= 1'b0;
+        6'd3: reg3_enable_out <= 1'b0;
+        default: reg0_enable_out <= 1'b0;
+      endcase
+    end
+    fsm_ALURegOp_5:
+    begin
+      case (param2)
+        6'd0: reg0_enable_out <= 1'b1;
+        6'd1: reg1_enable_out <= 1'b1;
+        6'd2: reg2_enable_out <= 1'b1;
+        6'd3: reg3_enable_out <= 1'b1;
+        default: reg0_enable_out <= 1'b1;
+      endcase
+    end
+    fsm_ALURegOp_6:
+    begin
+      alu_param2_read <= 1'b1;
+    end
+    fsm_ALURegOp_7:
+    begin
+      alu_param2_read <= 1'b0;
+    end
+    fsm_ALURegOp_8:
+    begin
+      case (param2)
+        6'd0: reg0_enable_out <= 1'b0;
+        6'd1: reg1_enable_out <= 1'b0;
+        6'd2: reg2_enable_out <= 1'b0;
+        6'd3: reg3_enable_out <= 1'b0;
+        default: reg0_enable_out <= 1'b0;
+      endcase
+    end
+    fsm_ALURegOp_9:
+    begin
+      alu_enable_out <= 1'b1;
+    end
+    fsm_ALURegOp_10:
+    begin
+      case (param1)
+      6'd0:
+        reg0_enable_read <= 1'b1;
+      6'd1:
+        reg1_enable_read <= 1'b1;
+      6'd2:
+        reg2_enable_read <= 1'b1;
+      6'd3:
+        reg3_enable_read <= 1'b1;
+      endcase
+    end
+    fsm_ALURegOp_11:
+    begin
+      case (param1)
+      6'd0:
+        reg0_enable_read <= 1'b0;
+      6'd1:
+        reg1_enable_read <= 1'b0;
+      6'd2:
+        reg2_enable_read <= 1'b0;
+      6'd3:
+        reg3_enable_read <= 1'b0;
+      endcase
+    end
+    fsm_ALURegOp_12:
+    begin
+      alu_enable_out <= 1'b0;
+    end
+
+    //ALU immediate operation state machines
+    fsm_ALUImmOp_1: //Send param1 and opCode to ALU
+    begin
+      case (opCode)
+        4'b0010: alu_op <= 3'b000; //Addi
+        4'b0100: alu_op <= 3'b001; //Subi
+      endcase
+      case (param1)
+        6'd0: reg0_enable_out <= 1'b1;
+        6'd1: reg1_enable_out <= 1'b1;
+        6'd2: reg2_enable_out <= 1'b1;
+        6'd3: reg3_enable_out <= 1'b1;
+      endcase
+    end
+    fsm_ALUImmOp_2:
+    begin
+      alu_param1_read <= 1'b1;
+    end
+    fsm_ALUImmOp_3:
+    begin
+      alu_param1_read <= 1'b0;
+    end
+    fsm_ALUImmOp_4: //Send imm value to bus to ALU
+    begin
+      case (param1)
+        6'd0: reg0_enable_out <= 1'b0;
+        6'd1: reg1_enable_out <= 1'b0;
+        6'd2: reg2_enable_out <= 1'b0;
+        6'd3: reg3_enable_out <= 1'b0;
+      endcase
+    end
+    fsm_ALUImmOp_5:
+    begin
+      bus_out <= {{10{1'b0}},{param2}};
+    end
+    fsm_ALUImmOp_6:
+    begin
+      alu_param2_read <= 1'b1;
+    end
+    fsm_ALUImmOp_7:
+    begin
+      alu_param2_read <= 1'b0;
+    end
+    fsm_ALUImmOp_8:
+    begin
+      bus_out <= 16'bz;
+    end
+    fsm_ALUImmOp_9:
+    begin
+      alu_enable_out <= 1'b1;
+    end
+    fsm_ALUImmOp_10:
+    begin
+      case (param1)
+        6'd0:
+          reg0_enable_read <= 1'b1;
+        6'd1:
+          reg1_enable_read <= 1'b1;
+        6'd2:
+          reg2_enable_read <= 1'b1;
+        6'd3:
+          reg3_enable_read <= 1'b1;
+      endcase
+    end
+    fsm_ALUImmOp_11:
+    begin
+      case (param1)
+        6'd0:
+          reg0_enable_read <= 1'b0;
+        6'd1:
+          reg1_enable_read <= 1'b0;
+        6'd2:
+          reg2_enable_read <= 1'b0;
+        6'd3:
+          reg3_enable_read <= 1'b0;
+      endcase
+    end
+    fsm_ALUImmOp_12:
+    begin
+      alu_enable_out <= 1'b0;
+    end
+
+    //Memory load state machine (Load (Ri), Rj)
+    fsm_Load_1: //Send param 1 reg to MAR
+    begin
+      case (param1)
+        6'd0: reg0_enable_out <= 1'b1;
+        6'd1: reg1_enable_out <= 1'b1;
+        6'd2: reg2_enable_out <= 1'b1;
+        6'd3: reg3_enable_out <= 1'b1;
+      endcase
+    end
+    fsm_Load_2:
+    begin
+      mar_enable_read <= 1'b1;
+      mem_rw <= 1'b0;
+    end
+    fsm_Load_3: //Send MAR to Mem, MDR read from Mem
+    begin
+      mar_enable_read <= 1'b0;
+      mdr_enable_mem_read <= 1'b1;
+    end
+    fsm_Load_4:
+    begin
+      mem_enable <= 1'b1;
+      case (param1)
+        6'd0: reg0_enable_out <= 1'b0;
+        6'd1: reg1_enable_out <= 1'b0;
+        6'd2: reg2_enable_out <= 1'b0;
+        6'd3: reg3_enable_out <= 1'b0;
+      endcase
+    end
+    fsm_Load_5: //param2 reg read from MDR out
+    begin
+      mem_enable <= 1'b0;
+      mdr_enable_mem_read <= 1'b0;
+      mdr_enable_bus_out <= 1'b1;
+    end
+    fsm_Load_6:
+    begin
+      case (param2)
+        6'd0: reg0_enable_read <= 1'b1;
+        6'd1: reg1_enable_read <= 1'b1;
+        6'd2: reg2_enable_read <= 1'b1;
+        6'd3: reg3_enable_read <= 1'b1;
+      endcase
+    end
+    fsm_Load_7:
+      case (param2)
+        6'd0: reg0_enable_read <= 1'b0;
+        6'd1: reg1_enable_read <= 1'b0;
+        6'd2: reg2_enable_read <= 1'b0;
+        6'd3: reg3_enable_read <= 1'b0;
+      endcase
+    fsm_Load_8:
+    begin
+      mdr_enable_bus_out <= 1'b0;
+    end
+
+    //Memory store state machine (Store Ri, (Rj) )
+    fsm_Store_1: //Send param2 reg to MAR
+    begin
+      case (param2)
+        6'd0: reg0_enable_out <= 1'b1;
+        6'd1: reg1_enable_out <= 1'b1;
+        6'd2: reg2_enable_out <= 1'b1;
+        6'd3: reg3_enable_out <= 1'b1;
+      endcase
+    end
+    fsm_Store_2:
+    begin
+      mar_enable_read <= 1'b1;
+    end
+    fsm_Store_3:
+    begin
+      mar_enable_read <= 1'b0;
+    end
+    fsm_Store_4:
+    begin
+      mem_enable <= 1'b0;
+      case (param2)
+        6'd0: reg0_enable_out <= 1'b0;
+        6'd1: reg1_enable_out <= 1'b0;
+        6'd2: reg2_enable_out <= 1'b0;
+        6'd3: reg3_enable_out <= 1'b0;
+      endcase
+    end
+    fsm_Store_5:
+    begin
+      case (param1)
+        6'd0: reg0_enable_out <= 1'b1;
+        6'd1: reg1_enable_out <= 1'b1;
+        6'd2: reg2_enable_out <= 1'b1;
+        6'd3: reg3_enable_out <= 1'b1;
+      endcase
+    end
+    fsm_Store_5:
+    begin
+      mdr_enable_bus_read <= 1'b1;
+      mem_rw <= 1'b1;
+    end
+    fsm_Store_6:
+    begin
+      mdr_enable_bus_read <= 1'b0;
+    end
+    fsm_Store_7:
+    begin
+      mdr_enable_mem_out <= 1'b1;
+      case (param1)
+        6'd0: reg0_enable_out <= 1'b0;
+        6'd1: reg1_enable_out <= 1'b0;
+        6'd2: reg2_enable_out <= 1'b0;
+        6'd3: reg3_enable_out <= 1'b0;
+      endcase
+    end
+    fsm_Store_8:
+    begin
+      mem_enable <= 1'b1;
+    end
+    fsm_Store_9:
+    begin
+      mem_enable <= 1'b0;
+      mdr_enable_mem_out <= 1'b0;
+    end
+
+    fsm_reset_1:
+    begin
+      //Program Counter signals
+      pc_reset <= 1'b1;
+      pc_enable_out <= 1'b0;
+      pc_enable_increment <= 1'b0;
+
+      //MAR unit signals
+      mar_reset <= 1'b1;
+      mar_enable_read <= 1'b0;
+      mar_enable_out <= 1'b1;
+
+      //Register unit signals
+      reg_reset <= 1'b1;
+      reg0_enable_read <= 1'b0;
+      reg0_enable_out <= 1'b0;
+      reg1_enable_read <= 1'b0;
+      reg1_enable_out <= 1'b0;
+      reg2_enable_read <= 1'b0;
+      reg2_enable_out <= 1'b0;
+      reg3_enable_read <= 1'b0;
+      reg3_enable_out <= 1'b0;
+
+      //MDR signals
+      mem_enable <= 1'b0;
+      mem_rw <= 1'b0; //0==read, 1==write
+      mdr_reset <= 1'b0;
+      mdr_enable_bus_out <= 1'b0;
+      mdr_enable_mem_out <= 1'b0;
+      mdr_enable_bus_read <= 1'b0;
+      mdr_enable_mem_read <= 1'b0;
+
+      //Instruction register signals
+      id_reset <= 1'b1;
+      id_enable <= 1'b0;
+
+      //ALU signals
+      alu_reset <= 1'b1;
+      alu_op <= 4'b0000;
+      alu_param1_read <= 1'b0;
+      alu_param2_read <= 1'b0;
+      alu_enable_out <= 1'b0;
+
+      //Bus signals
+      bus_out <= 16'dZ;
+    end
+    fsm_reset_2:
+    begin
+      //Program Counter signals
+      pc_reset <= 1'b0;
+
+      //MAR unit signals
+      mar_reset <= 1'b0;
+
+      //Register unit signals
+      reg_reset <= 1'b0;
+
+      //Instruction register signals
+      id_reset <= 1'b0;
+
+      //ALU signals
+      alu_reset <= 1'b0;
+    end
+  endcase
+end//calc_output
+endmodule

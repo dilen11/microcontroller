@@ -1,0 +1,57 @@
+{C:/Users/dkhan/Desktop/final project/alu.v} {1 {vlog -work work -stats=none {C:/Users/dkhan/Desktop/final project/alu.v}
+Model Technology ModelSim PE Student Edition vlog 10.4a Compiler 2015.03 Apr  7 2015
+-- Compiling module alu
+
+Top level modules:
+	alu
+
+} {} {}} {C:/Users/dkhan/Desktop/final project/fsm.v} {1 {vlog -work work -stats=none {C:/Users/dkhan/Desktop/final project/fsm.v}
+Model Technology ModelSim PE Student Edition vlog 10.4a Compiler 2015.03 Apr  7 2015
+-- Compiling module fsm
+
+Top level modules:
+	fsm
+
+} {} {}} {C:/Users/dkhan/Desktop/final project/mdr.v} {1 {vlog -work work -stats=none {C:/Users/dkhan/Desktop/final project/mdr.v}
+Model Technology ModelSim PE Student Edition vlog 10.4a Compiler 2015.03 Apr  7 2015
+-- Compiling module mdr
+
+Top level modules:
+	mdr
+
+} {} {}} {C:/Users/dkhan/Desktop/final project/pcounter.v} {1 {vlog -work work -stats=none {C:/Users/dkhan/Desktop/final project/pcounter.v}
+Model Technology ModelSim PE Student Edition vlog 10.4a Compiler 2015.03 Apr  7 2015
+-- Compiling module pcounter
+
+Top level modules:
+	pcounter
+
+} {} {}} {C:/Users/dkhan/Desktop/final project/registers.v} {1 {vlog -work work -stats=none {C:/Users/dkhan/Desktop/final project/registers.v}
+Model Technology ModelSim PE Student Edition vlog 10.4a Compiler 2015.03 Apr  7 2015
+-- Compiling module registers
+
+Top level modules:
+	registers
+
+} {} {}} {C:/Users/dkhan/Desktop/final project/mar.v} {1 {vlog -work work -stats=none {C:/Users/dkhan/Desktop/final project/mar.v}
+Model Technology ModelSim PE Student Edition vlog 10.4a Compiler 2015.03 Apr  7 2015
+-- Compiling module mar
+
+Top level modules:
+	mar
+
+} {} {}} {C:/Users/dkhan/Desktop/final project/instructiondecoder.v} {1 {vlog -work work -stats=none {C:/Users/dkhan/Desktop/final project/instructiondecoder.v}
+Model Technology ModelSim PE Student Edition vlog 10.4a Compiler 2015.03 Apr  7 2015
+-- Compiling module instructiondecoder
+
+Top level modules:
+	instructiondecoder
+
+} {} {}} {C:/Users/dkhan/Desktop/final project/CPU.v} {1 {vlog -work work -stats=none {C:/Users/dkhan/Desktop/final project/CPU.v}
+Model Technology ModelSim PE Student Edition vlog 10.4a Compiler 2015.03 Apr  7 2015
+-- Compiling module testbench_cpu
+
+Top level modules:
+	testbench_cpu
+
+} {} {}}
